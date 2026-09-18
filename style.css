@@ -149,9 +149,12 @@ nav ul a.active {
   color: #fff !important;
   padding: 18px 28px;
   border-radius: var(--radius);
+  border: none;
   text-decoration: none;
   font-weight: 700;
+  font-family: inherit;
   text-align: center;
+  cursor: pointer;
   box-shadow: 0 4px 14px rgba(47,127,209,.35);
   transition: transform .15s ease;
 }
@@ -240,7 +243,7 @@ h2 { font-size: 28px; margin-bottom: 20px; }
   display: block;
   width: 100%;
   max-width: none;
-  height: 1500px;
+  height: 640px;
   border: 0;
   margin: 0;
   padding: 0;
@@ -275,5 +278,5 @@ footer {
   .hero-photos { grid-template-columns: 1fr; }
   .about-grid, .contact-grid { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
-  .booking-embed { height: 1700px; }
+  .booking-embed { height: 950px; }
 }

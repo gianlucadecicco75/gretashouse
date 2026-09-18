@@ -39,18 +39,29 @@
   <p>Tariffe e disponibilità in tempo reale</p>
 </div>
 
-<section>
-  <div class="price-box">
-    <p>Il nostro listino prezzi per soggiornare da Greta's House, nel complesso Selva del Turchese, Otranto, nel meraviglioso Salento, varia in base alla stagione e alla durata del soggiorno. Offriamo tariffe per soggiorni brevi, mentre per soggiorni più lunghi è possibile accordarsi per tariffe scontate.</p>
-    <p>Contattaci alla mail <a href="mailto:gianlucadec@libero.it">gianlucadec@libero.it</a> oppure sul personale o su WhatsApp al <a href="tel:+393317203096">+39 331 720 3096</a>, oppure verifica subito la disponibilità e i prezzi qui sotto:</p>
-  </div>
+<section style="padding-top:6px; padding-bottom:6px;">
+  <p style="text-align:center;">
+    <button type="button" class="cta-btn" onclick="mostraDisponibilita()">
+      <span class="main">Verifica disponibilità e prenota</span>
+      <span class="sub">Prezzi in tempo reale · Conferma immediata</span>
+    </button>
+  </p>
 </section>
 
-<section id="disponibilita">
-  <h2>Verifica disponibilità e prenota</h2>
-  <iframe class="booking-embed" src="https://gianlucadecicco75.github.io/gretashouse-pms/prenota-gretashouse.html" title="Disponibilità e prenotazione Greta's House" loading="lazy"></iframe>
+<section id="disponibilita" style="display:none; padding-top:10px;">
+  <iframe class="booking-embed" id="booking-iframe" data-src="https://gianlucadecicco75.github.io/gretashouse-pms/prenota-gretashouse.html" title="Disponibilità e prenotazione Greta's House" loading="lazy"></iframe>
   <p class="booking-note">Prezzi in tempo reale · Conferma immediata. Se il modulo non si carica, <a href="https://gianlucadecicco75.github.io/gretashouse-pms/prenota-gretashouse.html" target="_blank" rel="noopener">aprilo in una pagina a parte</a>.</p>
 </section>
+
+<script>
+function mostraDisponibilita() {
+  var sec = document.getElementById('disponibilita');
+  var iframe = document.getElementById('booking-iframe');
+  if (!iframe.src) iframe.src = iframe.getAttribute('data-src');
+  sec.style.display = '';
+  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
 
 <footer>
   © 2026 Greta's House — Selva del Turchese, Otranto (LE) — CIN IT075091C200116647
