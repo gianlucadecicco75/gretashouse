@@ -11,16 +11,9 @@
   body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#faf6f4; color:#1a1a1a; }
   a { color:inherit; }
 
-  .hero { display:none; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
 
-  .wrap { max-width:720px; margin:0 auto; padding:0 16px; }
-  .wrap.wide { max-width:1100px; padding:0 24px; }
-  .section { padding:34px 0; }
-  .section h2 { font-size:21px; color:var(--accent); margin:0 0 14px; font-family:Georgia,'Times New Roman',serif; }
-  .section p { font-size:14.5px; line-height:1.7; color:#4a4a4a; white-space:pre-line; }
-  .section.alt { background:#fff; }
-
-  .searchcard { background:#fff; border-radius:16px; padding:20px; margin-top:22px; box-shadow:0 6px 22px rgba(0,0,0,.1); position:relative; z-index:2; }
+  .searchcard { background:#fff; border-radius:16px; padding:20px; margin-top:0; box-shadow:0 6px 22px rgba(0,0,0,.1); position:relative; z-index:2; }
 
   /* Calendario disponibilità */
   .cal-wrap { margin-bottom:18px; }
@@ -47,7 +40,7 @@
   .cal-legend .dot.available { background:#2e7d32; }
   .cal-legend .dot.unavailable { background:#c0392b; }
   .cal-selection { text-align:center; font-size:13.5px; font-weight:600; color:var(--accent); margin-top:12px; padding-top:12px; border-top:1px solid #f3ecea; }
-  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
   .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
   .field label { display:block; font-size:11.5px; font-weight:700; color:#6b5b58; margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
   .field input, .field select { width:100%; padding:10px 11px; border:1px solid #ddd0cd; border-radius:8px; font-size:14px; background:#fff; }
@@ -65,25 +58,6 @@
   .roomcard button { padding:11px 20px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
   .msg { text-align:center; padding:40px 20px; color:#8a7a77; font-size:14px; }
 
-  .gallery-wrap { position:relative; }
-  .gallery-arrow { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:none; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.18); font-size:20px; line-height:1; color:var(--accent); cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; }
-  .gallery-arrow.left { left:-6px; }
-  .gallery-arrow.right { right:-6px; }
-  .gallery-arrow:hover { background:#f4f0ee; }
-  @media(max-width:520px){ .gallery-arrow{ width:32px; height:32px; font-size:17px; } }
-
-  .gallery { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
-  .gallery::-webkit-scrollbar { height:6px; }
-  .gallery::-webkit-scrollbar-thumb { background:#ddd0cd; border-radius:6px; }
-  .gallery img { flex:0 0 auto; width:min(78vw,320px); height:220px; object-fit:cover; border-radius:12px; scroll-snap-align:start; }
-
-  footer { background:var(--accent); color:#fff; padding:34px 20px 30px; text-align:center; }
-  footer .contact-row { font-size:13.5px; margin:6px 0; opacity:.95; }
-  footer .contact-row a { color:#fff; text-decoration:underline; }
-  footer .wa-btn { display:inline-block; margin-top:14px; background:#25D366; color:#fff; padding:11px 22px; border-radius:30px; font-weight:700; font-size:13.5px; text-decoration:none; }
-  footer iframe { width:100%; height:220px; border:0; border-radius:10px; margin-top:18px; }
-  footer .fine { font-size:11px; opacity:.6; margin-top:20px; }
-
   .overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; overflow-y:auto; }
   .modalbox { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:420px; margin:auto; position:relative; color:#1a1a1a; }
   .modalbox h2 { margin:0 0 4px; font-size:18px; font-family:inherit; }
@@ -95,15 +69,6 @@
 </style>
 </head>
 <body>
-
-<div class="hero" id="hero">
-  <div class="hero-inner wrap">
-    <img class="hero-logo" id="hero-logo" src="" alt="Logo">
-    <div class="eyebrow" id="hero-eyebrow" style="display:none"></div>
-    <h1 id="hero-name">Greta's House</h1>
-    <div class="sub" id="hero-sub" style="display:none"></div>
-  </div>
-</div>
 
 <div class="wrap">
   <div class="searchcard">
@@ -133,125 +98,11 @@
   <div class="results" id="results"></div>
 </div>
 
-<div class="section" id="welcome-section" style="display:none">
-  <div class="wrap wide"><h2 id="welcome-title"></h2><p id="welcome-text"></p></div>
-</div>
-
-<div class="section alt" id="about-section" style="display:none">
-  <div class="wrap wide"><h2>Chi siamo</h2><p id="about-text"></p></div>
-</div>
-
-<div class="section" id="location-section" style="display:none">
-  <div class="wrap wide"><h2>La zona</h2><p id="location-text"></p></div>
-</div>
-
-<div class="section alt" id="gallery-section" style="display:none">
-  <div class="wrap wide"><h2>Galleria</h2>
-    <div class="gallery-wrap">
-      <button class="gallery-arrow left" onclick="scrollGallery(-1)" aria-label="Foto precedente">‹</button>
-      <div class="gallery" id="gallery-grid"></div>
-      <button class="gallery-arrow right" onclick="scrollGallery(1)" aria-label="Foto successiva">›</button>
-    </div>
-  </div>
-</div>
-
-<footer id="footer-section">
-  <div id="footer-name" style="font-family:Georgia,serif;font-style:italic;font-size:19px;margin-bottom:10px">Greta's House</div>
-  <div id="footer-contacts"></div>
-  <a id="footer-wa" class="wa-btn" style="display:none" target="_blank">💬 Scrivici su WhatsApp</a>
-  <div id="footer-map"></div>
-  <div class="fine">© Greta's House — tutti i diritti riservati</div>
-</footer>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var SUPABASE_URL = 'https://xhacoxddmcjwvwwygdsa.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWNveGRkbWNqd3Z3d3lnZHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjM3ODUsImV4cCI6MjEwMjAzOTc4NX0.G7dbZAyG9hinOU-h3WmsZGeCNd8AfwXY4eN7doSL5qk';
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-function scrollGallery(dir) {
-  var g = document.getElementById('gallery-grid');
-  if (!g) return;
-  g.scrollBy({ left: dir * (g.clientWidth * 0.8), behavior: 'smooth' });
-}
-
-// ============================================================
-// CONTENUTI DEL SITO — letti dalla maschera "Sito web" dentro DeskFlow (Impostazioni → Sito web).
-// Se cambi testi/foto/colori li da DeskFlow, questa pagina li mostra in automatico al prossimo
-// caricamento, senza bisogno di ricaricare o modificare questo file.
-// ============================================================
-// Calcola se un colore è chiaro o scuro (luminanza), per scegliere testo bianco o scuro sopra di
-// esso e restare sempre leggibile qualunque sfondo venga scelto da Impostazioni → Sito web.
-function coloreEChiaro(hex) {
-  hex = (hex || '').replace('#', '');
-  if (hex.length === 3) hex = hex.split('').map(function(c){ return c+c; }).join('');
-  if (hex.length !== 6) return false;
-  var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
-  var luminanza = (0.299*r + 0.587*g + 0.114*b) / 255;
-  return luminanza > 0.6;
-}
-
-async function caricaContenutiSito() {
-  try {
-    var ris = await sb.from('site_content').select('data').eq('id', 'config').maybeSingle();
-    var c = (ris.data && ris.data.data) || {};
-
-    if (c.colorPrimary) {
-      document.documentElement.style.setProperty('--primary', c.colorPrimary);
-      document.getElementById('hero').classList.toggle('hero-dark-text', coloreEChiaro(c.colorPrimary));
-    }
-    if (c.colorAccent) document.documentElement.style.setProperty('--accent', c.colorAccent);
-
-    if (c.propertyName) { document.getElementById('hero-name').textContent = c.propertyName; document.getElementById('footer-name').textContent = c.propertyName; }
-    if (c.eyebrow) { var e = document.getElementById('hero-eyebrow'); e.textContent = c.eyebrow; e.style.display = ''; }
-    if (c.heroSubtitle) { var s = document.getElementById('hero-sub'); s.textContent = c.heroSubtitle; s.style.display = ''; }
-    if (c.heroImage) {
-      var logo = document.getElementById('hero-logo');
-      logo.src = c.heroImage;
-      logo.style.display = 'block';
-    }
-
-    if (c.showWelcome && c.welcomeText) {
-      document.getElementById('welcome-title').textContent = c.welcomeTitle || '';
-      document.getElementById('welcome-text').textContent = c.welcomeText;
-      document.getElementById('welcome-section').style.display = '';
-    }
-    if (c.aboutText) {
-      document.getElementById('about-text').textContent = c.aboutText;
-      document.getElementById('about-section').style.display = '';
-    }
-    if (c.locationText) {
-      document.getElementById('location-text').textContent = c.locationText;
-      document.getElementById('location-section').style.display = '';
-    }
-    if (c.galleryImages && c.galleryImages.length) {
-      document.getElementById('gallery-grid').innerHTML = c.galleryImages.map(function(url){
-        return '<img src="' + url + '" loading="lazy">';
-      }).join('');
-      document.getElementById('gallery-section').style.display = '';
-    }
-
-    if (c.showFooterContacts !== false) {
-      var righe = [];
-      if (c.address) righe.push(c.address);
-      if (c.phone) righe.push('<a href="tel:' + c.phone.replace(/\s/g,'') + '">' + c.phone + '</a>');
-      if (c.email) righe.push('<a href="mailto:' + c.email + '">' + c.email + '</a>');
-      if (c.cin) righe.push('CIN ' + c.cin);
-      document.getElementById('footer-contacts').innerHTML = righe.map(function(r){ return '<div class="contact-row">' + r + '</div>'; }).join('');
-    }
-    if (c.whatsapp) {
-      var wa = document.getElementById('footer-wa');
-      wa.href = 'https://wa.me/' + c.whatsapp.replace(/[^0-9]/g,'');
-      wa.style.display = 'inline-block';
-    }
-    if (c.mapsEmbedUrl) {
-      document.getElementById('footer-map').innerHTML = '<iframe src="' + c.mapsEmbedUrl + '" loading="lazy" allowfullscreen></iframe>';
-    }
-  } catch (err) {
-    console.error('Contenuti del sito non caricati (la ricerca disponibilita funziona comunque):', err);
-  }
-}
-caricaContenutiSito();
 
 // ============================================================
 // RICERCA DISPONIBILITA E PREZZI
