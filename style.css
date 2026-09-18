@@ -115,14 +115,21 @@ nav ul a.active {
   margin-bottom: 14px;
 }
 .lang-switch a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   text-decoration: none;
   color: var(--muted);
   font-size: 13px;
   font-weight: 600;
-  padding: 4px 11px;
+  padding: 4px 12px 4px 8px;
   border-radius: 999px;
   border: 1px solid #e4e4e4;
   background: #fff;
+}
+.lang-switch a img {
+  display: block;
+  border-radius: 2px;
 }
 .lang-switch a.active {
   background: var(--blue);
@@ -289,6 +296,36 @@ h2 { font-size: 28px; margin-bottom: 20px; }
   border: 0;
   display: block;
 }
+.review-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+}
+.review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 24px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+  transition: transform .15s ease;
+}
+.review-btn:hover { transform: translateY(-2px); }
+.review-btn svg { flex-shrink: 0; }
+.review-google { background: #fff; color: var(--text); border: 1px solid #e4e4e4; }
+.review-booking { background: #003580; }
+#bottom-nav {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 30px 20px 10px;
+}
+#bottom-nav .pill-nav { margin: 0; }
 footer {
   text-align: center;
   padding: 30px 20px;
