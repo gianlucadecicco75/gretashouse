@@ -279,4 +279,5 @@ footer {
   .about-grid, .contact-grid { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
   .booking-embed { height: 950px; }
+  .features[style] { columns: 1 !important; }
 }
