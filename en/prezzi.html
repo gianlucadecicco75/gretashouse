@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prices &amp; Availability – Greta's House, Otranto | Salento</title>
+<meta name="description" content="Price list for Greta's House in Otranto, Selva del Turchese. Check availability and book online with real-time prices.">
+<link rel="canonical" href="https://gretashouse.it/en/prezzi.html">
+<link rel="alternate" hreflang="it" href="https://gretashouse.it/prezzi.html">
+<link rel="alternate" hreflang="en" href="https://gretashouse.it/en/prezzi.html">
+<link rel="alternate" hreflang="fr" href="https://gretashouse.it/fr/prezzi.html">
+<link rel="alternate" hreflang="x-default" href="https://gretashouse.it/prezzi.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Prices &amp; Availability – Greta's House">
+<meta property="og:description" content="Check availability and book online with real-time prices.">
+<meta property="og:url" content="https://gretashouse.it/en/prezzi.html">
+<meta property="og:locale" content="en_US">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <span>CIN IT075091C200116647</span>
+    <span><a href="mailto:gianlucadec@libero.it">gianlucadec@libero.it</a> · <a href="tel:+393317203096">+39 331 7203096</a></span>
+  </div>
+</header>
+
+<div class="hero-header">
+  <div class="lang-switch"><a href="../prezzi.html">🇮🇹 IT</a><a href="prezzi.html" class="active">🇬🇧 EN</a><a href="../fr/prezzi.html">🇫🇷 FR</a></div>
+  <div class="logo-wrap"><a href="../index.html"><img class="logo-img" src="../images/logo.png" alt="Greta's House - Casa Vacanze Otranto"></a></div>
+  <p class="brand-sub">Holiday Home · Otranto, Selva del Turchese</p>
+  <ul class="pill-nav"><li><a href="index.html">Home</a></li><li><a href="chi-siamo.html">About us</a></li><li><a href="galleria.html">Gallery</a></li><li><a href="prezzi.html" class="active">Prices</a></li><li><a href="contatti.html">Contact</a></li></ul>
+</div>
+
+<div class="page-header">
+  <h1>Prices</h1>
+  <p>Real-time rates and availability</p>
+</div>
+
+<section style="padding-top:6px; padding-bottom:6px;">
+  <p style="text-align:center;">
+    <button type="button" class="cta-btn" onclick="mostraDisponibilita()">
+      <span class="main">Check availability &amp; book</span>
+      <span class="sub">Real-time prices · Instant confirmation</span>
+    </button>
+  </p>
+</section>
+
+<section id="disponibilita" style="display:none; padding-top:10px;">
+  <iframe class="booking-embed" id="booking-iframe" data-src="https://gianlucadecicco75.github.io/gretashouse-pms/prenota-gretashouse.html" title="Availability and booking - Greta's House" loading="lazy"></iframe>
+  <p class="booking-note">Real-time prices · Instant confirmation. If the form doesn't load, <a href="https://gianlucadecicco75.github.io/gretashouse-pms/prenota-gretashouse.html" target="_blank" rel="noopener">open it in a separate page</a>.</p>
+</section>
+
+<script>
+function mostraDisponibilita() {
+  var sec = document.getElementById('disponibilita');
+  var iframe = document.getElementById('booking-iframe');
+  if (!iframe.src) iframe.src = iframe.getAttribute('data-src');
+  sec.style.display = '';
+  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+<footer>
+  © 2026 Greta's House — Selva del Turchese, Otranto (LE) — CIN IT075091C200116647
+</footer>
+
+</body>
+</html>
