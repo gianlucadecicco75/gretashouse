@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prenota — Greta's House</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%231e88e5'/%3E%3Ctext x='12' y='17' font-size='15' text-anchor='middle'%3E%F0%9F%8F%A1%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --primary:#1e88e5; --accent:#2c3e50; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#faf6f4; color:#1a1a1a; }
+  a { color:inherit; }
+
+  .hero { display:none; }
+
+  .wrap { max-width:720px; margin:0 auto; padding:0 16px; }
+  .wrap.wide { max-width:1100px; padding:0 24px; }
+  .section { padding:34px 0; }
+  .section h2 { font-size:21px; color:var(--accent); margin:0 0 14px; font-family:Georgia,'Times New Roman',serif; }
+  .section p { font-size:14.5px; line-height:1.7; color:#4a4a4a; white-space:pre-line; }
+  .section.alt { background:#fff; }
+
+  .searchcard { background:#fff; border-radius:16px; padding:20px; margin-top:22px; box-shadow:0 6px 22px rgba(0,0,0,.1); position:relative; z-index:2; }
+
+  /* Calendario disponibilità */
+  .cal-wrap { margin-bottom:18px; }
+  .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cal-month { font-weight:700; font-size:15px; color:var(--accent); text-transform:capitalize; }
+  .cal-nav { border:none; background:#f3ecea; width:32px; height:32px; border-radius:8px; font-size:17px; cursor:pointer; color:var(--accent); }
+  .cal-nav:disabled { opacity:.35; cursor:default; }
+  .cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px; color:#9a8b88; text-transform:uppercase; margin-bottom:4px; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .cal-day { position:relative; text-align:center; padding:8px 0 10px; border-radius:8px; font-size:13.5px; cursor:pointer; border:1px solid transparent; color:#1a1a1a; }
+  .cal-day .dot { display:block; width:5px; height:5px; border-radius:50%; margin:3px auto 0; background:#cfc4c1; }
+  .cal-day.available .dot { background:#2e7d32; }
+  .cal-day.unavailable { color:#c7bcb9; cursor:default; }
+  .cal-day.unavailable .dot { background:#c0392b; }
+  .cal-day.empty { visibility:hidden; cursor:default; }
+  .cal-day.past { color:#d8cfcd; cursor:default; }
+  .cal-day.past .dot { background:transparent; }
+  .cal-day:not(.unavailable):not(.past):not(.empty):not(.selected):hover { background:#f3ecea; }
+  .cal-day.selected { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .cal-day.selected .dot { background:#fff; }
+  .cal-day.in-range { background:#e8f0fb; }
+  .cal-legend { display:flex; gap:16px; align-items:center; font-size:11.5px; color:#8a7a77; margin-top:10px; }
+  .cal-legend .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .cal-legend .dot.available { background:#2e7d32; }
+  .cal-legend .dot.unavailable { background:#c0392b; }
+  .cal-selection { text-align:center; font-size:13.5px; font-weight:600; color:var(--accent); margin-top:12px; padding-top:12px; border-top:1px solid #f3ecea; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
+  .field label { display:block; font-size:11.5px; font-weight:700; color:#6b5b58; margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+  .field input, .field select { width:100%; padding:10px 11px; border:1px solid #ddd0cd; border-radius:8px; font-size:14px; background:#fff; }
+  .btn { display:block; width:100%; padding:14px; border-radius:10px; border:none; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:disabled { opacity:.5; }
+
+  .results { margin-top:20px; }
+  .roomcard { background:#fff; border:1px solid #eee0dd; border-radius:14px; padding:18px 20px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+  .roomcard .rn { font-size:17px; font-weight:800; color:#1a1a1a; }
+  .roomcard .rt { font-size:12.5px; color:#8a7a77; margin-top:1px; }
+  .roomcard .price-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:12px; }
+  .roomcard .price { font-size:22px; font-weight:800; color:var(--primary); }
+  .roomcard .price small { font-size:12px; font-weight:500; color:#8a7a77; }
+  .roomcard button { padding:11px 20px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
+  .msg { text-align:center; padding:40px 20px; color:#8a7a77; font-size:14px; }
+
+  .gallery-wrap { position:relative; }
+  .gallery-arrow { position:absolute; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:50%; border:none; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.18); font-size:20px; line-height:1; color:var(--accent); cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center; }
+  .gallery-arrow.left { left:-6px; }
+  .gallery-arrow.right { right:-6px; }
+  .gallery-arrow:hover { background:#f4f0ee; }
+  @media(max-width:520px){ .gallery-arrow{ width:32px; height:32px; font-size:17px; } }
+
+  .gallery { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+  .gallery::-webkit-scrollbar { height:6px; }
+  .gallery::-webkit-scrollbar-thumb { background:#ddd0cd; border-radius:6px; }
+  .gallery img { flex:0 0 auto; width:min(78vw,320px); height:220px; object-fit:cover; border-radius:12px; scroll-snap-align:start; }
+
+  footer { background:var(--accent); color:#fff; padding:34px 20px 30px; text-align:center; }
+  footer .contact-row { font-size:13.5px; margin:6px 0; opacity:.95; }
+  footer .contact-row a { color:#fff; text-decoration:underline; }
+  footer .wa-btn { display:inline-block; margin-top:14px; background:#25D366; color:#fff; padding:11px 22px; border-radius:30px; font-weight:700; font-size:13.5px; text-decoration:none; }
+  footer iframe { width:100%; height:220px; border:0; border-radius:10px; margin-top:18px; }
+  footer .fine { font-size:11px; opacity:.6; margin-top:20px; }
+
+  .overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; overflow-y:auto; }
+  .modalbox { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:420px; margin:auto; position:relative; color:#1a1a1a; }
+  .modalbox h2 { margin:0 0 4px; font-size:18px; font-family:inherit; }
+  .modalbox .rowinfo { display:flex; justify-content:space-between; font-size:13.5px; padding:5px 0; border-bottom:1px solid #f3ecea; }
+  .modalbox .field { margin-top:10px; }
+  .modalbox button.close { position:absolute; top:16px; right:18px; background:none; border:none; font-size:20px; cursor:pointer; color:#8a7a77; }
+  .ok-box { text-align:center; padding:20px 6px; }
+  .ok-box .tick { font-size:52px; }
+</style>
+</head>
+<body>
+
+<div class="hero" id="hero">
+  <div class="hero-inner wrap">
+    <img class="hero-logo" id="hero-logo" src="" alt="Logo">
+    <div class="eyebrow" id="hero-eyebrow" style="display:none"></div>
+    <h1 id="hero-name">Greta's House</h1>
+    <div class="sub" id="hero-sub" style="display:none"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="searchcard">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" id="cal-prev" onclick="cambiaMese(-1)">‹</button>
+        <div class="cal-month" id="cal-month-label"></div>
+        <button class="cal-nav" id="cal-next" onclick="cambiaMese(1)">›</button>
+      </div>
+      <div class="cal-weekdays"><span>lun</span><span>mar</span><span>mer</span><span>gio</span><span>ven</span><span>sab</span><span>dom</span></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend"><span><span class="dot available"></span>Disponibile</span><span><span class="dot unavailable"></span>Occupato</span></div>
+      <div class="cal-selection" id="cal-selection">Seleziona la data di check-in</div>
+    </div>
+
+    <input type="hidden" id="q-checkin">
+    <input type="hidden" id="q-checkout">
+
+    <div class="row3">
+      <div class="field"><label>Adulti</label><select id="q-adults"></select></div>
+      <div class="field"><label>Bambini</label><select id="q-children"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+      <div class="field"></div>
+    </div>
+    <button class="btn btn-primary" id="btn-cerca" onclick="cercaDisponibilita()">Cerca disponibilita</button>
+  </div>
+
+  <div class="results" id="results"></div>
+</div>
+
+<div class="section" id="welcome-section" style="display:none">
+  <div class="wrap wide"><h2 id="welcome-title"></h2><p id="welcome-text"></p></div>
+</div>
+
+<div class="section alt" id="about-section" style="display:none">
+  <div class="wrap wide"><h2>Chi siamo</h2><p id="about-text"></p></div>
+</div>
+
+<div class="section" id="location-section" style="display:none">
+  <div class="wrap wide"><h2>La zona</h2><p id="location-text"></p></div>
+</div>
+
+<div class="section alt" id="gallery-section" style="display:none">
+  <div class="wrap wide"><h2>Galleria</h2>
+    <div class="gallery-wrap">
+      <button class="gallery-arrow left" onclick="scrollGallery(-1)" aria-label="Foto precedente">‹</button>
+      <div class="gallery" id="gallery-grid"></div>
+      <button class="gallery-arrow right" onclick="scrollGallery(1)" aria-label="Foto successiva">›</button>
+    </div>
+  </div>
+</div>
+
+<footer id="footer-section">
+  <div id="footer-name" style="font-family:Georgia,serif;font-style:italic;font-size:19px;margin-bottom:10px">Greta's House</div>
+  <div id="footer-contacts"></div>
+  <a id="footer-wa" class="wa-btn" style="display:none" target="_blank">💬 Scrivici su WhatsApp</a>
+  <div id="footer-map"></div>
+  <div class="fine">© Greta's House — tutti i diritti riservati</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SUPABASE_URL = 'https://xhacoxddmcjwvwwygdsa.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWNveGRkbWNqd3Z3d3lnZHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjM3ODUsImV4cCI6MjEwMjAzOTc4NX0.G7dbZAyG9hinOU-h3WmsZGeCNd8AfwXY4eN7doSL5qk';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function scrollGallery(dir) {
+  var g = document.getElementById('gallery-grid');
+  if (!g) return;
+  g.scrollBy({ left: dir * (g.clientWidth * 0.8), behavior: 'smooth' });
+}
+
+// ============================================================
+// CONTENUTI DEL SITO — letti dalla maschera "Sito web" dentro DeskFlow (Impostazioni → Sito web).
+// Se cambi testi/foto/colori li da DeskFlow, questa pagina li mostra in automatico al prossimo
+// caricamento, senza bisogno di ricaricare o modificare questo file.
+// ============================================================
+// Calcola se un colore è chiaro o scuro (luminanza), per scegliere testo bianco o scuro sopra di
+// esso e restare sempre leggibile qualunque sfondo venga scelto da Impostazioni → Sito web.
+function coloreEChiaro(hex) {
+  hex = (hex || '').replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(function(c){ return c+c; }).join('');
+  if (hex.length !== 6) return false;
+  var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+  var luminanza = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return luminanza > 0.6;
+}
+
+async function caricaContenutiSito() {
+  try {
+    var ris = await sb.from('site_content').select('data').eq('id', 'config').maybeSingle();
+    var c = (ris.data && ris.data.data) || {};
+
+    if (c.colorPrimary) {
+      document.documentElement.style.setProperty('--primary', c.colorPrimary);
+      document.getElementById('hero').classList.toggle('hero-dark-text', coloreEChiaro(c.colorPrimary));
+    }
+    if (c.colorAccent) document.documentElement.style.setProperty('--accent', c.colorAccent);
+
+    if (c.propertyName) { document.getElementById('hero-name').textContent = c.propertyName; document.getElementById('footer-name').textContent = c.propertyName; }
+    if (c.eyebrow) { var e = document.getElementById('hero-eyebrow'); e.textContent = c.eyebrow; e.style.display = ''; }
+    if (c.heroSubtitle) { var s = document.getElementById('hero-sub'); s.textContent = c.heroSubtitle; s.style.display = ''; }
+    if (c.heroImage) {
+      var logo = document.getElementById('hero-logo');
+      logo.src = c.heroImage;
+      logo.style.display = 'block';
+    }
+
+    if (c.showWelcome && c.welcomeText) {
+      document.getElementById('welcome-title').textContent = c.welcomeTitle || '';
+      document.getElementById('welcome-text').textContent = c.welcomeText;
+      document.getElementById('welcome-section').style.display = '';
+    }
+    if (c.aboutText) {
+      document.getElementById('about-text').textContent = c.aboutText;
+      document.getElementById('about-section').style.display = '';
+    }
+    if (c.locationText) {
+      document.getElementById('location-text').textContent = c.locationText;
+      document.getElementById('location-section').style.display = '';
+    }
+    if (c.galleryImages && c.galleryImages.length) {
+      document.getElementById('gallery-grid').innerHTML = c.galleryImages.map(function(url){
+        return '<img src="' + url + '" loading="lazy">';
+      }).join('');
+      document.getElementById('gallery-section').style.display = '';
+    }
+
+    if (c.showFooterContacts !== false) {
+      var righe = [];
+      if (c.address) righe.push(c.address);
+      if (c.phone) righe.push('<a href="tel:' + c.phone.replace(/\s/g,'') + '">' + c.phone + '</a>');
+      if (c.email) righe.push('<a href="mailto:' + c.email + '">' + c.email + '</a>');
+      if (c.cin) righe.push('CIN ' + c.cin);
+      document.getElementById('footer-contacts').innerHTML = righe.map(function(r){ return '<div class="contact-row">' + r + '</div>'; }).join('');
+    }
+    if (c.whatsapp) {
+      var wa = document.getElementById('footer-wa');
+      wa.href = 'https://wa.me/' + c.whatsapp.replace(/[^0-9]/g,'');
+      wa.style.display = 'inline-block';
+    }
+    if (c.mapsEmbedUrl) {
+      document.getElementById('footer-map').innerHTML = '<iframe src="' + c.mapsEmbedUrl + '" loading="lazy" allowfullscreen></iframe>';
+    }
+  } catch (err) {
+    console.error('Contenuti del sito non caricati (la ricerca disponibilita funziona comunque):', err);
+  }
+}
+caricaContenutiSito();
+
+// ============================================================
+// RICERCA DISPONIBILITA E PREZZI
+// ============================================================
+(function(){
+  var sel = document.getElementById('q-adults');
+  for (var i=1;i<=8;i++) sel.innerHTML += '<option value="'+i+'"'+(i===2?' selected':'')+'>'+i+'</option>';
+})();
+
+// ============================================================
+// CALENDARIO DISPONIBILITA (pallini verdi/rossi in base alle prenotazioni reali)
+// ============================================================
+var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+var oggiDate = new Date(); oggiDate.setHours(0,0,0,0);
+var meseVisualizzato = new Date(oggiDate.getFullYear(), oggiDate.getMonth(), 1);
+var calSelCheckin = null, calSelCheckout = null;
+var calRooms = null, calBookings = null;
+
+function fmtISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtIT(iso){ var p = iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+
+async function caricaDatiCalendario() {
+  try {
+    var risR = await sb.from('rooms').select('*').eq('status', 'disponibile');
+    var risB = await sb.from('bookings').select('room_id, checkin, checkout, status').neq('status', 'cancellata');
+    calRooms = risR.data || [];
+    calBookings = risB.data || [];
+  } catch (e) {
+    console.error('Calendario: dati non caricati', e);
+    calRooms = []; calBookings = [];
+  }
+  renderCalendario();
+}
+
+// Un giorno è "occupato" se TUTTE le unità disponibili risultano prenotate quella notte
+function calGiornoOccupato(iso) {
+  if (!calRooms || !calRooms.length) return false;
+  var libera = calRooms.some(function(r){
+    return !calBookings.some(function(b){ return b.room_id === r.id && b.checkin <= iso && b.checkout > iso; });
+  });
+  return !libera;
+}
+
+function renderCalendario() {
+  var label = document.getElementById('cal-month-label');
+  var grid = document.getElementById('cal-grid');
+  if (!label || !grid) return;
+  label.textContent = MESI_IT[meseVisualizzato.getMonth()] + ' ' + meseVisualizzato.getFullYear();
+
+  var primoLimite = new Date(oggiDate.getFullYear(), oggiDate.getMonth(), 1);
+  document.getElementById('cal-prev').disabled = (meseVisualizzato.getTime() <= primoLimite.getTime());
+
+  var anno = meseVisualizzato.getFullYear(), mese = meseVisualizzato.getMonth();
+  var primoGiorno = new Date(anno, mese, 1);
+  var giorniNelMese = new Date(anno, mese+1, 0).getDate();
+  var offset = (primoGiorno.getDay() + 6) % 7; // lun=0 ... dom=6
+
+  var html = '';
+  for (var i=0; i<offset; i++) html += '<div class="cal-day empty"></div>';
+
+  for (var d=1; d<=giorniNelMese; d++) {
+    var data = new Date(anno, mese, d);
+    var iso = fmtISO(data);
+    var classi = ['cal-day'];
+    var clickAttr = '';
+    if (data.getTime() < oggiDate.getTime()) {
+      classi.push('past');
+    } else if (calGiornoOccupato(iso)) {
+      classi.push('unavailable');
+    } else {
+      classi.push('available');
+      clickAttr = ' onclick="calSelezionaGiorno(\'' + iso + '\')"';
+    }
+    if (iso === calSelCheckin || iso === calSelCheckout) classi.push('selected');
+    else if (calSelCheckin && calSelCheckout && iso > calSelCheckin && iso < calSelCheckout) classi.push('in-range');
+
+    html += '<div class="' + classi.join(' ') + '"' + clickAttr + '>' + d + '<span class="dot"></span></div>';
+  }
+  grid.innerHTML = html;
+
+  var sel = document.getElementById('cal-selection');
+  if (calSelCheckin && calSelCheckout) {
+    sel.textContent = 'Check-in ' + fmtIT(calSelCheckin) + '  →  Check-out ' + fmtIT(calSelCheckout);
+  } else if (calSelCheckin) {
+    sel.textContent = 'Check-in ' + fmtIT(calSelCheckin) + ' — ora seleziona il check-out';
+  } else {
+    sel.textContent = 'Seleziona la data di check-in';
+  }
+}
+
+function calSelezionaGiorno(iso) {
+  if (!calSelCheckin || (calSelCheckin && calSelCheckout)) {
+    calSelCheckin = iso; calSelCheckout = null;
+  } else if (iso <= calSelCheckin) {
+    calSelCheckin = iso; calSelCheckout = null;
+  } else {
+    var cursore = new Date(calSelCheckin+'T00:00:00');
+    var fine = new Date(iso+'T00:00:00');
+    var tutteLibere = true;
+    while (cursore < fine) {
+      var ds = fmtISO(cursore);
+      if (calGiornoOccupato(ds)) { tutteLibere = false; break; }
+      cursore.setDate(cursore.getDate()+1);
+    }
+    if (!tutteLibere) {
+      alert('Alcune notti in questo intervallo non sono libere. Scegli un altro periodo.');
+      calSelCheckin = iso; calSelCheckout = null;
+    } else {
+      calSelCheckout = iso;
+    }
+  }
+  document.getElementById('q-checkin').value = calSelCheckin || '';
+  document.getElementById('q-checkout').value = calSelCheckout || '';
+  renderCalendario();
+}
+
+function cambiaMese(dir) {
+  meseVisualizzato = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth()+dir, 1);
+  renderCalendario();
+}
+
+caricaDatiCalendario();
+
+function notti(checkin, checkout) {
+  var a = new Date(checkin+'T00:00:00'), b = new Date(checkout+'T00:00:00');
+  return Math.round((b-a) / 86400000);
+}
+
+function prezzoDirettoPerNotte(listinoRoom, pax, dataISO) {
+  if (!listinoRoom) return 0;
+  var pk = 'PAX' + pax;
+  var periodi = listinoRoom.periodi || [];
+  var giornoEsatto = periodi.find(function(p){ return p.dal === dataISO && p.al === dataISO; });
+  if (giornoEsatto) {
+    if (giornoEsatto.prezzi[pk]) return parseFloat(giornoEsatto.prezzi[pk]);
+    if (giornoEsatto.prezzi.PAX1) return parseFloat(giornoEsatto.prezzi.PAX1);
+  }
+  for (var i=0;i<periodi.length;i++) {
+    var p = periodi[i];
+    if (p.dal === dataISO && p.al === dataISO) continue;
+    if (p.dal <= dataISO && p.al >= dataISO) {
+      if (p.prezzi[pk]) return parseFloat(p.prezzi[pk]);
+      if (p.prezzi.PAX1) return parseFloat(p.prezzi.PAX1);
+      if (p.prezzi.BASE) return parseFloat(p.prezzi.BASE);
+    }
+  }
+  var prezzi = listinoRoom.prezzi || {};
+  if (prezzi[pk]) return parseFloat(prezzi[pk]);
+  if (prezzi.PAX1) return parseFloat(prezzi.PAX1);
+  if (prezzi.BASE) return parseFloat(prezzi.BASE);
+  return 0;
+}
+
+function calcolaOccupazionePerTipologia(rooms, bookings, ds, tipo) {
+  var roomsDelTipo = rooms.filter(function(r){ return r.status==='disponibile' && (r.type||'Senza tipologia')===tipo; });
+  if (!roomsDelTipo.length) return 0;
+  var occupateOggi = bookings.filter(function(b){ return b.status!=='cancellata' && b.checkin<=ds && b.checkout>ds; });
+  var occupiedIds = {};
+  occupateOggi.forEach(function(b){ occupiedIds[b.room_id] = true; });
+  var occupate = roomsDelTipo.filter(function(r){ return occupiedIds[r.id]; }).length;
+  return Math.round((occupate/roomsDelTipo.length)*100);
+}
+function soglieAdjPerOccupazione(occ, soglie) {
+  for (var i=0;i<soglie.length;i++) { var s=soglie[i]; if (occ>=s.min && occ<s.max) return s.adj; }
+  return 0;
+}
+function eventiAttiviPerData(ds, eventi) {
+  return eventi.filter(function(e){ return e.dal<=ds && e.al>=ds; });
+}
+
+function prezzoFinaleNotte(room, listinoRoom, pax, ds, ctx) {
+  var prezzo = prezzoDirettoPerNotte(listinoRoom, pax, ds);
+  if (!prezzo) return 0;
+  var agg = (ctx.listinoAggiustamenti||[]).find(function(a){ return a.data===ds; });
+  var totPct = agg ? agg.valore : 0;
+  var eventi = eventiAttiviPerData(ds, (ctx.revenueConfig && ctx.revenueConfig.eventi) || []);
+  totPct += eventi.reduce(function(s,e){ return s+(parseFloat(e.boost)||0); }, 0);
+  var occ = calcolaOccupazionePerTipologia(ctx.rooms, ctx.bookings, ds, room.type||'Senza tipologia');
+  totPct += soglieAdjPerOccupazione(occ, (ctx.revenueConfig && ctx.revenueConfig.soglie) || []);
+  if (totPct) prezzo = Math.max(0, Math.round(prezzo*(1+totPct/100)*100)/100);
+  return prezzo;
+}
+
+// Sconto per soggiorni lunghi — soglie e percentuali decise liberamente da Gian in Impostazioni
+// (array di {notti, sconto}, es. [{notti:5,sconto:5},{notti:10,sconto:12}]). Si applica la soglia
+// più alta tra quelle raggiunte dal numero di notti del soggiorno (non si sommano tra loro).
+function scontoSoggiornoLungoPct(numNotti, soglie) {
+  var migliore = 0;
+  (soglie || []).forEach(function(s){
+    var n = parseInt(s.notti) || 0;
+    var sc = parseFloat(s.sconto) || 0;
+    if (numNotti >= n && sc > migliore) migliore = sc;
+  });
+  return migliore;
+}
+
+function prezzoTotaleSoggiorno(room, listinoRoom, pax, checkin, checkout, ctx) {
+  var tot = 0;
+  var numNotti = 0;
+  var cursore = new Date(checkin+'T00:00:00');
+  var fine = new Date(checkout+'T00:00:00');
+  while (cursore < fine) {
+    var ds = cursore.getFullYear()+'-'+String(cursore.getMonth()+1).padStart(2,'0')+'-'+String(cursore.getDate()).padStart(2,'0');
+    tot += prezzoFinaleNotte(room, listinoRoom, pax, ds, ctx);
+    cursore.setDate(cursore.getDate()+1);
+    numNotti++;
+  }
+  var scontoPct = scontoSoggiornoLungoPct(numNotti, ctx.scontiSoggiornoLungo);
+  if (scontoPct > 0) tot = Math.round(tot * (1 - scontoPct/100) * 100) / 100;
+  return tot;
+}
+
+var ultimaRicerca = null;
+
+async function cercaDisponibilita() {
+  var checkin = document.getElementById('q-checkin').value;
+  var checkout = document.getElementById('q-checkout').value;
+  var adults = parseInt(document.getElementById('q-adults').value) || 1;
+  var children = parseInt(document.getElementById('q-children').value) || 0;
+  var pax = adults + children;
+  var n = notti(checkin, checkout);
+
+  var results = document.getElementById('results');
+  if (!checkin || !checkout || n < 1) {
+    results.innerHTML = '<div class="msg">Seleziona date valide (il check-out deve essere dopo il check-in).</div>';
+    return;
+  }
+
+  var btn = document.getElementById('btn-cerca');
+  btn.disabled = true;
+  btn.textContent = 'Ricerca in corso...';
+  results.innerHTML = '<div class="msg">Controllo la disponibilita...</div>';
+
+  try {
+    var risR = await sb.from('rooms').select('*').eq('status', 'disponibile');
+    var risB = await sb.from('bookings').select('room_id, checkin, checkout, status').neq('status', 'cancellata');
+    var risL = await sb.from('listino').select('*').eq('tariffa_id', 'standard');
+    var risRC = await sb.from('app_blobs').select('data').eq('key', 'revenueConfig').maybeSingle();
+    var risLA = await sb.from('app_blobs').select('data').eq('key', 'listinoAggiustamenti').maybeSingle();
+    var risRT = await sb.from('app_blobs').select('data').eq('key', 'regoleTipo').maybeSingle();
+    var risSet = await sb.from('app_blobs').select('data').eq('key', 'settings').maybeSingle();
+    if (risR.error) throw risR.error;
+    if (risB.error) throw risB.error;
+    if (risL.error) throw risL.error;
+    var rooms = risR.data, bookings = risB.data, listino = risL.data;
+    var minNottiPerTipo = (risRT.data && risRT.data.data && risRT.data.data.minNotti) || {};
+    var ctx = {
+      rooms: rooms,
+      bookings: bookings,
+      revenueConfig: (risRC.data && risRC.data.data) || { soglie: [], eventi: [] },
+      listinoAggiustamenti: (risLA.data && risLA.data.data) || [],
+      scontiSoggiornoLungo: (risSet.data && risSet.data.data && risSet.data.data.scontiSoggiornoLungo) || []
+    };
+
+    var occupatePerCamera = {};
+    (bookings || []).forEach(function(b){
+      if (b.checkin < checkout && b.checkout > checkin) occupatePerCamera[b.room_id] = true;
+    });
+
+    // Il soggiorno minimo si applica in base al giorno di arrivo (stesso criterio usato nel
+    // gestionale): se per quella data/tipologia è richiesto un minimo di notti maggiore di quelle
+    // scelte, quella camera non compare tra i risultati.
+    function minNottiRichiesto(tipo) {
+      var mappa = minNottiPerTipo[tipo || 'Senza tipologia'] || {};
+      return parseInt(mappa[checkin]) || 1;
+    }
+
+    var camereLibere = (rooms || []).filter(function(r){
+      return !occupatePerCamera[r.id] && (r.capacity || 99) >= pax && n >= minNottiRichiesto(r.type);
+    });
+
+    if (!camereLibere.length) {
+      var minRichiestoMax = Math.max.apply(null, (rooms||[]).map(function(r){ return minNottiRichiesto(r.type); }).concat([1]));
+      var messaggioMin = (minRichiestoMax > n)
+        ? ('Per le date scelte è richiesto un soggiorno minimo di ' + minRichiestoMax + ' nott' + (minRichiestoMax===1?'e':'i') + '. Prova ad allungare il soggiorno.')
+        : 'Nessuna unita disponibile per queste date/ospiti. Prova con altre date, oppure scrivici direttamente.';
+      results.innerHTML = '<div class="msg">' + messaggioMin + '</div>';
+      return;
+    }
+
+    ultimaRicerca = { checkin: checkin, checkout: checkout, adults: adults, children: children, n: n };
+
+    results.innerHTML = camereLibere.map(function(r){
+      var listinoRoom = (listino || []).find(function(l){ return l.room_id === r.id; });
+      var totale = prezzoTotaleSoggiorno(r, listinoRoom, pax, checkin, checkout, ctx);
+      var perNotte = totale / n;
+      var scontoAttivo = scontoSoggiornoLungoPct(n, ctx.scontiSoggiornoLungo);
+      return '<div class="roomcard">' +
+        '<div class="rn">' + r.name + ' per ' + pax + ' person' + (pax===1?'a':'e') + '</div>' +
+        '<div class="rt">' + (r.type||'') + '</div>' +
+        (scontoAttivo>0 ? '<div style="display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;margin-bottom:4px">🎉 Sconto soggiorno lungo -' + scontoAttivo + '% già applicato</div>' : '') +
+        '<div class="price-row">' +
+          '<div class="price">EUR ' + totale.toFixed(2) + '<br><small>' + n + ' nott' + (n===1?'e':'i') + ' - EUR ' + perNotte.toFixed(2) + '/notte</small></div>' +
+          '<button onclick="apriPrenotazione(\'' + r.id + '\', \'' + r.name.replace(/'/g,"\\'") + '\', ' + totale.toFixed(2) + ')">Prenota</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    results.innerHTML = '<div class="msg">Errore nel controllare la disponibilita - riprova tra poco.</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Cerca disponibilita';
+  }
+}
+
+function apriPrenotazione(roomId, roomName, totale) {
+  var div = document.createElement('div');
+  div.id = 'book-overlay';
+  div.className = 'overlay';
+  div.innerHTML =
+    '<div class="modalbox">' +
+      '<button class="close" onclick="document.getElementById(\'book-overlay\').remove()">X</button>' +
+      '<h2>Completa la prenotazione</h2>' +
+      '<div class="rowinfo"><span>Unita</span><span><b>' + roomName + '</b></span></div>' +
+      '<div class="rowinfo"><span>Check-in</span><span>' + ultimaRicerca.checkin + '</span></div>' +
+      '<div class="rowinfo"><span>Check-out</span><span>' + ultimaRicerca.checkout + '</span></div>' +
+      '<div class="rowinfo"><span>Totale</span><span><b>EUR ' + totale.toFixed(2) + '</b></span></div>' +
+      '<div class="field"><label>Nome e cognome</label><input type="text" id="p-nome"></div>' +
+      '<div class="field"><label>Email</label><input type="email" id="p-email"></div>' +
+      '<div class="field"><label>Telefono</label><input type="text" id="p-telefono"></div>' +
+      '<div class="field"><label>Note (opzionale)</label><input type="text" id="p-note"></div>' +
+      '<button class="btn btn-primary" id="btn-conferma" onclick="confermaPrenotazione(\'' + roomId + '\', \'' + roomName.replace(/'/g,"\\'") + '\', ' + totale.toFixed(2) + ')">Conferma prenotazione</button>' +
+      '<div style="font-size:11px;color:#9a8b88;margin-top:10px">Prenotazione diretta, senza carta di credito. Ti contatteremo per confermare i dettagli del check-in.</div>' +
+    '</div>';
+  document.body.appendChild(div);
+}
+
+async function confermaPrenotazione(roomId, roomName, totale) {
+  var nome = (document.getElementById('p-nome')||{value:''}).value.trim();
+  var email = (document.getElementById('p-email')||{value:''}).value.trim();
+  var telefono = (document.getElementById('p-telefono')||{value:''}).value.trim();
+  var note = (document.getElementById('p-note')||{value:''}).value.trim();
+  if (!nome || !email) { alert('Inserisci almeno nome e email.'); return; }
+
+  var btn = document.getElementById('btn-conferma');
+  btn.disabled = true;
+  btn.textContent = 'Invio in corso...';
+
+  try {
+    var guestId = null;
+    var risG = await sb.from('guests').select('id').eq('email', email).maybeSingle();
+    if (risG.data) {
+      guestId = risG.data.id;
+    } else {
+      guestId = 'g_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      var errG = (await sb.from('guests').insert({ id: guestId, name: nome, email: email, phone: telefono })).error;
+      if (errG) throw errG;
+    }
+
+    var bookingId = 'b_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    var errB = (await sb.from('bookings').insert({
+      id: bookingId,
+      guest_id: guestId,
+      guest_name: nome,
+      room_id: roomId,
+      room_name: roomName,
+      checkin: ultimaRicerca.checkin,
+      checkout: ultimaRicerca.checkout,
+      adults: ultimaRicerca.adults,
+      children: ultimaRicerca.children,
+      source: 'Sito web',
+      status: 'confermata',
+      total_price: totale,
+      pagato: 'no',
+      notes: note,
+      created_at: new Date().toISOString()
+    })).error;
+    if (errB) throw errB;
+
+    try {
+      var risBlob = await sb.from('app_blobs').select('data').eq('key', 'settings').maybeSingle();
+      var s = (risBlob.data && risBlob.data.data) || {};
+      if (s.emailInvioPromemoria && s.passwordInvioPromemoria) {
+        var functionUrl = SUPABASE_URL + '/functions/v1/invio-ricevuta';
+        fetch(functionUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({
+            smtpEmail: s.emailInvioPromemoria, smtpPassword: s.passwordInvioPromemoria,
+            to: email, toName: nome,
+            subject: 'Prenotazione confermata - Greta\'s House',
+            message: 'Gentile '+nome+',\n\nLa ringraziamo per la prenotazione presso Greta\'s House.\n\nUnita: '+roomName+'\nCheck-in: '+ultimaRicerca.checkin+'\nCheck-out: '+ultimaRicerca.checkout+'\nTotale: EUR '+totale.toFixed(2)+'\n\nLa contatteremo presto per i dettagli del check-in.\n\nCordiali saluti,\nGreta\'s House'
+          })
+        }).catch(function(){});
+        if (s.email) {
+          fetch(functionUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+            body: JSON.stringify({
+              smtpEmail: s.emailInvioPromemoria, smtpPassword: s.passwordInvioPromemoria,
+              to: s.email, toName: 'Greta\'s House',
+              subject: 'Nuova prenotazione dal sito - '+nome,
+              message: 'Nuova prenotazione ricevuta dal sito web:\n\nOspite: '+nome+' ('+email+', '+telefono+')\nUnita: '+roomName+'\nCheck-in: '+ultimaRicerca.checkin+'\nCheck-out: '+ultimaRicerca.checkout+'\nTotale: EUR '+totale.toFixed(2)+(note?'\nNote: '+note:'')+'\n\nVai su DeskFlow - Prenotazioni per gestirla.'
+            })
+          }).catch(function(){});
+        }
+      }
+    } catch (eNotif) { console.error('Notifica email non riuscita (la prenotazione resta comunque salvata):', eNotif); }
+
+    document.getElementById('book-overlay').innerHTML =
+      '<div class="modalbox"><div class="ok-box">' +
+        '<div class="tick">OK</div>' +
+        '<h2>Prenotazione confermata!</h2>' +
+        '<p style="color:#8a7a77;font-size:13.5px">Riceverai una email di conferma a breve. Grazie per aver scelto Greta\'s House!</p>' +
+        '<button class="btn btn-primary" onclick="document.getElementById(\'book-overlay\').remove(); location.reload();">Chiudi</button>' +
+      '</div></div>';
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = 'Conferma prenotazione';
+    alert('Errore durante la prenotazione: ' + (err.message || 'sconosciuto') + '\nRiprova, oppure contattaci direttamente.');
+  }
+}
+</script>
+</body>
+</html>
