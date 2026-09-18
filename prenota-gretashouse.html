@@ -116,7 +116,7 @@ var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio',
 var oggiDate = new Date(); oggiDate.setHours(0,0,0,0);
 var meseVisualizzato = new Date(oggiDate.getFullYear(), oggiDate.getMonth(), 1);
 var calSelCheckin = null, calSelCheckout = null;
-var calRooms = null, calBookings = null;
+var calRooms = null, calBookings = null, calBlocks = null;
 
 function fmtISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function fmtIT(iso){ var p = iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
@@ -125,20 +125,26 @@ async function caricaDatiCalendario() {
   try {
     var risR = await sb.from('rooms').select('*').eq('status', 'disponibile');
     var risB = await sb.from('bookings').select('room_id, checkin, checkout, status').neq('status', 'cancellata');
+    var risK = await sb.from('room_blocks').select('room_id, block_date');
     calRooms = risR.data || [];
     calBookings = risB.data || [];
+    calBlocks = risK.data || [];
   } catch (e) {
     console.error('Calendario: dati non caricati', e);
-    calRooms = []; calBookings = [];
+    calRooms = []; calBookings = []; calBlocks = [];
   }
   renderCalendario();
 }
 
-// Un giorno è "occupato" se TUTTE le unità disponibili risultano prenotate quella notte
+// Un giorno è "occupato" se TUTTE le unità disponibili risultano prenotate o bloccate quella notte
 function calGiornoOccupato(iso) {
   if (!calRooms || !calRooms.length) return false;
   var libera = calRooms.some(function(r){
-    return !calBookings.some(function(b){ return b.room_id === r.id && b.checkin <= iso && b.checkout > iso; });
+    var prenotata = calBookings.some(function(b){ return b.room_id === r.id && b.checkin <= iso && b.checkout > iso; });
+    if (prenotata) return false;
+    var bloccata = (calBlocks || []).some(function(k){ return k.room_id === r.id && k.block_date === iso; });
+    if (bloccata) return false;
+    return true;
   });
   return !libera;
 }
@@ -327,6 +333,7 @@ async function cercaDisponibilita() {
   try {
     var risR = await sb.from('rooms').select('*').eq('status', 'disponibile');
     var risB = await sb.from('bookings').select('room_id, checkin, checkout, status').neq('status', 'cancellata');
+    var risK = await sb.from('room_blocks').select('room_id, block_date');
     var risL = await sb.from('listino').select('*').eq('tariffa_id', 'standard');
     var risRC = await sb.from('app_blobs').select('data').eq('key', 'revenueConfig').maybeSingle();
     var risLA = await sb.from('app_blobs').select('data').eq('key', 'listinoAggiustamenti').maybeSingle();
@@ -336,6 +343,7 @@ async function cercaDisponibilita() {
     if (risB.error) throw risB.error;
     if (risL.error) throw risL.error;
     var rooms = risR.data, bookings = risB.data, listino = risL.data;
+    var blocks = risK.data || [];
     var minNottiPerTipo = (risRT.data && risRT.data.data && risRT.data.data.minNotti) || {};
     var ctx = {
       rooms: rooms,
@@ -348,6 +356,9 @@ async function cercaDisponibilita() {
     var occupatePerCamera = {};
     (bookings || []).forEach(function(b){
       if (b.checkin < checkout && b.checkout > checkin) occupatePerCamera[b.room_id] = true;
+    });
+    (blocks || []).forEach(function(k){
+      if (k.block_date >= checkin && k.block_date < checkout) occupatePerCamera[k.room_id] = true;
     });
 
     // Il soggiorno minimo si applica in base al giorno di arrivo (stesso criterio usato nel
