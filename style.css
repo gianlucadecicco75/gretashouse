@@ -177,18 +177,14 @@ h2 { font-size: 28px; margin-bottom: 20px; }
   padding: 24px;
 }
 .contact-card h3 { margin-top: 0; }
-.booking-widget {
-  background: #fff;
-  border: 1px solid #eaeaea;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0,0,0,.06);
-}
-.booking-widget iframe {
+.booking-embed {
   display: block;
   width: 100%;
-  height: 780px;
+  max-width: none;
+  height: 1500px;
   border: 0;
+  margin: 0;
+  padding: 0;
 }
 .booking-note {
   text-align: center;
@@ -206,5 +202,5 @@ footer {
   .hero-photos { grid-template-columns: 1fr; }
   .about-grid, .contact-grid { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
-  .booking-widget iframe { height: 900px; }
+  .booking-embed { height: 1700px; }
 }
