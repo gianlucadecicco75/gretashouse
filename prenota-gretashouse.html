@@ -11,9 +11,9 @@
   body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#faf6f4; color:#1a1a1a; }
   a { color:inherit; }
 
-  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .wrap { max-width:1080px; margin:0 auto; padding:16px; display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap; }
 
-  .searchcard { background:#fff; border-radius:16px; padding:20px; margin-top:0; box-shadow:0 6px 22px rgba(0,0,0,.1); position:relative; z-index:2; }
+  .searchcard { background:#fff; border-radius:16px; padding:18px; margin-top:0; box-shadow:0 6px 22px rgba(0,0,0,.1); position:relative; z-index:2; flex:0 0 320px; width:320px; }
 
   /* Calendario disponibilità */
   .cal-wrap { margin-bottom:18px; }
@@ -35,28 +35,28 @@
   .cal-day.selected { background:var(--primary); color:#fff; border-color:var(--primary); }
   .cal-day.selected .dot { background:#fff; }
   .cal-day.in-range { background:#e8f0fb; }
-  .cal-legend { display:flex; gap:16px; align-items:center; font-size:11.5px; color:#8a7a77; margin-top:10px; }
-  .cal-legend .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
-  .cal-legend .dot.available { background:#2e7d32; }
-  .cal-legend .dot.unavailable { background:#c0392b; }
-  .cal-selection { text-align:center; font-size:13.5px; font-weight:600; color:var(--accent); margin-top:12px; padding-top:12px; border-top:1px solid #f3ecea; }
 
-  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
   .field label { display:block; font-size:11.5px; font-weight:700; color:#6b5b58; margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
   .field input, .field select { width:100%; padding:10px 11px; border:1px solid #ddd0cd; border-radius:8px; font-size:14px; background:#fff; }
   .btn { display:block; width:100%; padding:14px; border-radius:10px; border:none; font-size:15px; font-weight:700; cursor:pointer; margin-top:14px; }
   .btn-primary { background:var(--accent); color:#fff; }
   .btn-primary:disabled { opacity:.5; }
 
-  .results { margin-top:20px; }
+  .results { margin-top:0; flex:1 1 380px; min-width:280px; }
+  .results:empty { display:none; }
+  @media(max-width:680px){ .searchcard { flex:1 1 100%; width:100%; } }
   .roomcard { background:#fff; border:1px solid #eee0dd; border-radius:14px; padding:18px 20px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
   .roomcard .rn { font-size:17px; font-weight:800; color:#1a1a1a; }
   .roomcard .rt { font-size:12.5px; color:#8a7a77; margin-top:1px; }
-  .roomcard .price-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:12px; }
+  .roomcard .price-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:12px; flex-wrap:wrap; gap:10px; }
   .roomcard .price { font-size:22px; font-weight:800; color:var(--primary); }
   .roomcard .price small { font-size:12px; font-weight:500; color:#8a7a77; }
+  .roomcard .btn-row { display:flex; gap:8px; }
   .roomcard button { padding:11px 20px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
+  .roomcard button.btn-outline { background:#fff; color:var(--accent); border:1px solid #ddd0cd; }
   .msg { text-align:center; padding:40px 20px; color:#8a7a77; font-size:14px; }
+  .msg .btn { max-width:280px; margin:14px auto 0; }
 
   .overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; overflow-y:auto; }
   .modalbox { background:#fff; border-radius:16px; padding:24px; width:100%; max-width:420px; margin:auto; position:relative; color:#1a1a1a; }
@@ -80,8 +80,6 @@
       </div>
       <div class="cal-weekdays"><span>lun</span><span>mar</span><span>mer</span><span>gio</span><span>ven</span><span>sab</span><span>dom</span></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-legend"><span><span class="dot available"></span>Disponibile</span><span><span class="dot unavailable"></span>Occupato</span></div>
-      <div class="cal-selection" id="cal-selection">Seleziona la data di check-in</div>
     </div>
 
     <input type="hidden" id="q-checkin">
@@ -90,7 +88,6 @@
     <div class="row3">
       <div class="field"><label>Adulti</label><select id="q-adults"></select></div>
       <div class="field"><label>Bambini</label><select id="q-children"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-      <div class="field"></div>
     </div>
     <button class="btn btn-primary" id="btn-cerca" onclick="cercaDisponibilita()">Cerca disponibilita</button>
   </div>
@@ -182,15 +179,6 @@ function renderCalendario() {
     html += '<div class="' + classi.join(' ') + '"' + clickAttr + '>' + d + '<span class="dot"></span></div>';
   }
   grid.innerHTML = html;
-
-  var sel = document.getElementById('cal-selection');
-  if (calSelCheckin && calSelCheckout) {
-    sel.textContent = 'Check-in ' + fmtIT(calSelCheckin) + '  →  Check-out ' + fmtIT(calSelCheckout);
-  } else if (calSelCheckin) {
-    sel.textContent = 'Check-in ' + fmtIT(calSelCheckin) + ' — ora seleziona il check-out';
-  } else {
-    sel.textContent = 'Seleziona la data di check-in';
-  }
 }
 
 function calSelezionaGiorno(iso) {
@@ -378,8 +366,10 @@ async function cercaDisponibilita() {
       var minRichiestoMax = Math.max.apply(null, (rooms||[]).map(function(r){ return minNottiRichiesto(r.type); }).concat([1]));
       var messaggioMin = (minRichiestoMax > n)
         ? ('Per le date scelte è richiesto un soggiorno minimo di ' + minRichiestoMax + ' nott' + (minRichiestoMax===1?'e':'i') + '. Prova ad allungare il soggiorno.')
-        : 'Nessuna unita disponibile per queste date/ospiti. Prova con altre date, oppure scrivici direttamente.';
-      results.innerHTML = '<div class="msg">' + messaggioMin + '</div>';
+        : 'Nessuna unita disponibile per queste date/ospiti. Prova con altre date, oppure invia una richiesta:';
+      results.innerHTML = '<div class="msg">' + messaggioMin +
+        '<button class="btn btn-primary" onclick="inviaRichiesta(\'' + checkin + '\', \'' + checkout + '\', ' + adults + ', ' + children + ', \'\')">Invia richiesta di disponibilità</button>' +
+      '</div>';
       return;
     }
 
@@ -396,7 +386,10 @@ async function cercaDisponibilita() {
         (scontoAttivo>0 ? '<div style="display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;margin-bottom:4px">🎉 Sconto soggiorno lungo -' + scontoAttivo + '% già applicato</div>' : '') +
         '<div class="price-row">' +
           '<div class="price">EUR ' + totale.toFixed(2) + '<br><small>' + n + ' nott' + (n===1?'e':'i') + ' - EUR ' + perNotte.toFixed(2) + '/notte</small></div>' +
-          '<button onclick="apriPrenotazione(\'' + r.id + '\', \'' + r.name.replace(/'/g,"\\'") + '\', ' + totale.toFixed(2) + ')">Prenota</button>' +
+          '<div class="btn-row">' +
+            '<button class="btn-outline" onclick="inviaRichiesta(\'' + checkin + '\', \'' + checkout + '\', ' + adults + ', ' + children + ', \'' + r.name.replace(/'/g,"\\'") + '\')">Invia richiesta</button>' +
+            '<button onclick="apriPrenotazione(\'' + r.id + '\', \'' + r.name.replace(/'/g,"\\'") + '\', ' + totale.toFixed(2) + ')">Prenota</button>' +
+          '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -407,6 +400,23 @@ async function cercaDisponibilita() {
     btn.disabled = false;
     btn.textContent = 'Cerca disponibilita';
   }
+}
+
+function inviaRichiesta(checkin, checkout, adults, children, roomName) {
+  var subject = 'Richiesta disponibilità - Greta\'s House';
+  var righe = [
+    'Buongiorno,',
+    '',
+    'Vorrei richiedere la disponibilità per il seguente periodo:',
+    '',
+    'Check-in: ' + checkin,
+    'Check-out: ' + checkout,
+    'Ospiti: ' + adults + ' adult' + (adults === 1 ? 'o' : 'i') + (children > 0 ? ', ' + children + ' bambin' + (children === 1 ? 'o' : 'i') : '')
+  ];
+  if (roomName) righe.push('Unità: ' + roomName);
+  righe.push('', 'Grazie, resto in attesa di un vostro riscontro.');
+  var body = righe.join('\n');
+  window.location.href = 'mailto:gianlucadec@libero.it?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 
 function apriPrenotazione(roomId, roomName, totale) {
